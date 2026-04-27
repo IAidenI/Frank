@@ -17,9 +17,10 @@ namespace Frank
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
+            Application.Run(new Lydia());
 
             // Gère le multiscreen
-            var state = new AppState();
+            /*var state = new AppState();
             foreach (var screen in Screen.AllScreens)
             {
                 // Sur chaques fenêtre on crée une nouvelle instance de Frank
@@ -30,7 +31,7 @@ namespace Frank
                 OpenForms.Add(form); // Ajoute un historique des fenêtres ouvertes
                 form.Show();
             }
-            Application.Run(); // lance l'application
+            Application.Run(); // lance l'application*/
         }
 
         public static void CleanCloseAll()

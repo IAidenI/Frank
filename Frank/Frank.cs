@@ -1,5 +1,4 @@
 using Microsoft.Win32;
-using System.Drawing.Drawing2D;
 using System.Runtime.InteropServices;
 
 namespace Frank
@@ -13,32 +12,6 @@ namespace Frank
         private bool allowRun    = false; // Autorise le programme a se lancer
         private bool allowClose  = false; // Autorise le programme a se fermer
         private int durationLeft = 10;
-
-        // Pour afficher un texte personalisé dans une picturebox
-        private struct TextStyle
-        {
-            public string text;
-            public FontFamily fontFamily;
-            public int fontStyle;
-            public float fontSize;
-            public Point position;
-            public StringFormat stringFormat;
-
-            public TextStyle(string text, FontFamily fontFamily, int fontStyle, float fontSize, Point position, StringFormat stringFormat)
-            {
-                this.text         = text;
-                this.fontFamily   = fontFamily;
-                this.fontStyle    = fontStyle;
-                this.fontSize     = fontSize;
-                this.position     = position;
-                this.stringFormat = stringFormat;
-            }
-        }
-
-        private StringFormat GetCenterAlignment()
-        {
-            return new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-        }
 
         private TextStyle lblTitleStyle;
         private TextStyle lblTimerStyle;
@@ -67,8 +40,8 @@ namespace Frank
             this.timer.Start();
 
             // Initialisation des labels
-            this.lblTitleStyle = new TextStyle("Vous avez été infecté par le virus Frank", new FontFamily("Segoe UI"), (int)FontStyle.Bold, 48, new Point(this.ClientSize.Width / 2, this.ClientSize.Height / 2), this.GetCenterAlignment());
-            this.lblTimerStyle = new TextStyle("Vos données serront supprimé dans " + this.durationLeft + " secondes", new FontFamily("Segoe UI"), (int)FontStyle.Regular, 48, new Point(this.ClientSize.Width / 2, this.ClientSize.Height / 2 + 100), this.GetCenterAlignment());
+            this.lblTitleStyle = new TextStyle("Vous avez été infecté par le virus Frank", new FontFamily("Segoe UI"), (int)FontStyle.Bold, 48, new Point(this.ClientSize.Width / 2, this.ClientSize.Height / 2), Utils.GetCenterAlignment());
+            this.lblTimerStyle = new TextStyle("Vos données serront supprimé dans " + this.durationLeft + " secondes", new FontFamily("Segoe UI"), (int)FontStyle.Regular, 48, new Point(this.ClientSize.Width / 2, this.ClientSize.Height / 2 + 100), Utils.GetCenterAlignment());
             this.btnEmergency.Location = new Point(this.ClientSize.Width - this.btnEmergency.Size.Width, this.ClientSize.Height - this.btnEmergency.Size.Height);
             this.pbBackground.Invalidate(); // Force la pictureBox a se rafraichir
         }
@@ -139,26 +112,8 @@ namespace Frank
         private void pbBackground_Paint(object sender, PaintEventArgs e)
         {
             if (!this.allowRun) return;
-            DrawText(this.lblTitleStyle, e);
-            DrawText(this.lblTimerStyle, e);
-        }
-
-        private void DrawText(TextStyle message, PaintEventArgs e)
-        {
-            if (!this.allowRun) return;
-
-            // Ajoute le texte voulu
-            using GraphicsPath path = new GraphicsPath();
-            path.AddString(message.text, message.fontFamily, message.fontStyle, message.fontSize, message.position, message.stringFormat);
-
-            // Crée un contour et un remplissage
-            using Pen outline = new Pen(Color.Black, 4);
-            using Brush fill = new SolidBrush(Color.White);
-
-            // Dessine le texte avec un contour d'une autre couleur
-            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            e.Graphics.DrawPath(outline, path);
-            e.Graphics.FillPath(fill, path);
+            Utils.DrawText(this.lblTitleStyle, e);
+            Utils.DrawText(this.lblTimerStyle, e);
         }
     }
 }

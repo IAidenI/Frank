@@ -27,4 +27,8 @@
     </EmbeddedResource>
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="NCalcSync" Version="5.12.0" />
+  </ItemGroup>
+
 </Project>

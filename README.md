@@ -1,13 +1,13 @@
-# Frank
+# Frydia
 
 Application WinForms de sensibilisation : elle simule un faux virus après déverrouillage de session Windows.  
 Ce programme est uniquement un outil de sensibilisation interne pour rappeler l’importance de verrouiller son poste de travail.
 
 ## Installation
 ```bash
-git clone https://github.com/IAidenI/Frank.git
-cd Frank && .\build.bat
-.\bin\Frank.exe
+git clone https://github.com/IAidenI/Frydia.git
+cd Frydia && .\build.bat
+.\bin\Frydia.exe
 ```
 
 ## Fonctionnement

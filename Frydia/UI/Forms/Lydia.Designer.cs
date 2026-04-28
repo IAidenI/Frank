@@ -28,10 +28,13 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             tbUser = new TextBox();
             lblTitle = new Label();
             btnValidate = new Button();
             tbCalcul = new TextBox();
+            timerSpy = new System.Windows.Forms.Timer(components);
+            timerMove = new System.Windows.Forms.Timer(components);
             SuspendLayout();
             // 
             // tbUser
@@ -73,6 +76,16 @@
             tbCalcul.Text = "Calcul";
             tbCalcul.KeyDown += tbCalcul_KeyDown;
             // 
+            // timerSpy
+            // 
+            timerSpy.Enabled = true;
+            timerSpy.Tick += timerSpy_Tick;
+            // 
+            // timerMove
+            // 
+            timerMove.Enabled = true;
+            timerMove.Tick += timerMove_Tick;
+            // 
             // Lydia
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -95,5 +108,7 @@
         private Label lblTitle;
         private Button btnValidate;
         private TextBox tbCalcul;
+        private System.Windows.Forms.Timer timerSpy;
+        private System.Windows.Forms.Timer timerMove;
     }
 }

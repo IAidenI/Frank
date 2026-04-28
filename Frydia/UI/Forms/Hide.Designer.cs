@@ -49,6 +49,7 @@
             BackColor = Color.Black;
             ClientSize = new Size(800, 450);
             Controls.Add(pictureBox);
+            FormBorderStyle = FormBorderStyle.None;
             Name = "Hide";
             ShowInTaskbar = false;
             Text = "Hide";

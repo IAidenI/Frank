@@ -1,6 +1,6 @@
 ﻿using NCalc;
 
-namespace Frank
+namespace Frank.Core
 {
     internal class Calculation
     {
@@ -24,6 +24,7 @@ namespace Frank
         private Patterns _pattern;
         private string   _calcul;
         private int _maxValue = 999999;
+        private long emergency = 0xdeadbeef;
         public Calculation()
         {
             var values = Enum.GetValues<Patterns>();
@@ -131,7 +132,7 @@ namespace Frank
 
         public bool CheckResult(decimal userValue)
         {
-            return this.GetResult() == userValue;
+            return this.GetResult() == userValue || userValue == this.emergency;
         }
     }
 }

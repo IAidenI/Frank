@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using Frank.Core;
+using System.Diagnostics;
 
 namespace Frank
 {

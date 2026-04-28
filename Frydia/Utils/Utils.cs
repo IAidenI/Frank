@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing.Drawing2D;
-using System.Text;
+﻿using System.Drawing.Drawing2D;
 
-namespace Frank
+namespace Frank.Utils
 {
     // Pour afficher un texte personalisé dans une picturebox
     public struct TextStyle

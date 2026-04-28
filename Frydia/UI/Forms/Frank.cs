@@ -1,3 +1,4 @@
+using Frank.Utils;
 using Microsoft.Win32;
 using System.Runtime.InteropServices;
 
@@ -40,8 +41,8 @@ namespace Frank
             this.timer.Start();
 
             // Initialisation des labels
-            this.lblTitleStyle = new TextStyle("Vous avez été infecté par le virus Frank", new FontFamily("Segoe UI"), (int)FontStyle.Bold, 48, new Point(this.ClientSize.Width / 2, this.ClientSize.Height / 2), Utils.GetCenterAlignment());
-            this.lblTimerStyle = new TextStyle("Vos données serront supprimé dans " + this.durationLeft + " secondes", new FontFamily("Segoe UI"), (int)FontStyle.Regular, 48, new Point(this.ClientSize.Width / 2, this.ClientSize.Height / 2 + 100), Utils.GetCenterAlignment());
+            this.lblTitleStyle = new TextStyle("Vous avez été infecté par le virus Frank", new FontFamily("Segoe UI"), (int)FontStyle.Bold, 48, new Point(this.ClientSize.Width / 2, this.ClientSize.Height / 2), Utils.Utils.GetCenterAlignment());
+            this.lblTimerStyle = new TextStyle("Vos données serront supprimé dans " + this.durationLeft + " secondes", new FontFamily("Segoe UI"), (int)FontStyle.Regular, 48, new Point(this.ClientSize.Width / 2, this.ClientSize.Height / 2 + 100), Utils.Utils.GetCenterAlignment());
             this.btnEmergency.Location = new Point(this.ClientSize.Width - this.btnEmergency.Size.Width, this.ClientSize.Height - this.btnEmergency.Size.Height);
             this.pbBackground.Invalidate(); // Force la pictureBox a se rafraichir
         }
@@ -112,8 +113,8 @@ namespace Frank
         private void pbBackground_Paint(object sender, PaintEventArgs e)
         {
             if (!this.allowRun) return;
-            Utils.DrawText(this.lblTitleStyle, e);
-            Utils.DrawText(this.lblTimerStyle, e);
+            Utils.Utils.DrawText(this.lblTitleStyle, e);
+            Utils.Utils.DrawText(this.lblTimerStyle, e);
         }
     }
 }

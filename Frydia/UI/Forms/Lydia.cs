@@ -7,8 +7,8 @@ namespace Frank
 {
     public partial class Lydia : Form
     {
-        [DllImport("user32.dll", SetLastError = true)] private static extern bool SetWindowDisplayAffinity(IntPtr hWnd, uint dwAffinity);
-        private const uint _WDA_EXCLUDEFROMCAPTURE = 0x00000011;
+        //[DllImport("user32.dll", SetLastError = true)] private static extern bool SetWindowDisplayAffinity(IntPtr hWnd, uint dwAffinity);
+        //private const uint _WDA_EXCLUDEFROMCAPTURE = 0x00000011;
 
         [DllImport("user32.dll")] private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
         public struct RECT
@@ -32,11 +32,52 @@ namespace Frank
 
         private Taskmanager _taskmanager;
 
+        private Point _frameCalculPad = new Point(15, 15);
+        private Point _frameInfoPad = new Point(15, 15);
+        private Point _frameInstructionsPad = new Point(15, 15);
+
+        private int _excelTries = 3;
+
         public Lydia()
         {
             InitializeComponent();
             this._calcul = new Calculation();
+
+            this.lblInstructions.Parent = this.frameInstructions;
+            this.iconInstructions.Parent = this.frameInstructions;
+            this.lblInstructions.BringToFront();
+            this.iconInstructions.BringToFront();
+
+            this.lblInfo.Parent = this.frameInfo;
+            this.lblInfo.BringToFront();
+
             this.tbCalcul.AutoSize = false;
+            this.lblInfo.Visible = false;
+            this.frameInfo.Visible = false;
+
+            this.BackColor = Color.FromArgb(248, 250, 253);
+
+            this.lblInfo.ForeColor = Color.FromArgb(168, 127, 29, 29);
+
+            this.frameCalul.BackgroundColor = Color.White;
+            this.frameCalul.BorderColor = Color.FromArgb(220, 225, 230);
+
+            this.frameInfo.BackgroundColor = Color.FromArgb(200, 245, 249, 255);
+            this.frameInfo.BorderColor = Color.FromArgb(190, 215, 255);
+
+            this.frameInstructions.BackgroundColor = Color.FromArgb(200, 245, 249, 255);
+            this.frameInstructions.BorderColor = Color.FromArgb(190, 215, 255);
+
+            this.frameInfo.BackgroundColor = Color.FromArgb(220, 255, 235, 238);
+            this.frameInfo.BorderColor = Color.FromArgb(200, 220, 38, 38);
+
+
+
+
+            this.rjUser.BorderColor = Color.FromArgb(200, 200, 200);
+            this.rjUser.BorderFocusColor = Color.FromArgb(74, 131, 255);
+            this.iconInstructions.IconColor = Color.FromArgb(19, 115, 241);
+
 
             this._watchers = new List<ProcessWatcher>
             {
@@ -76,22 +117,82 @@ namespace Frank
             this._taskmanager = new Taskmanager();
         }
 
+        private void Lydia_Shown(object sender, EventArgs e)
+        {
+            this.lblTitle.Focus();
+        }
+
         private void Lydia_Load(object sender, EventArgs e)
         {
-            this.tbCalcul.Text = this._calcul.Generate();
-            this.AutoResizeTextBox(this.tbCalcul);
+            this.CenterToScreen();
+
+            this.LoadCalcul();
 
             // Centre les composents en X
             this.lblTitle.Location = new Point((this.ClientSize.Width - this.lblTitle.Width) / 2, this.lblTitle.Location.Y);
-            this.tbCalcul.Location = new Point((this.ClientSize.Width - this.tbCalcul.Width) / 2, this.tbCalcul.Location.Y);
-            this.tbUser.Location = new Point((this.ClientSize.Width - this.tbUser.Width) / 2, this.tbUser.Location.Y);
-            this.btnValidate.Location = new Point(this.tbUser.Location.X + this.tbUser.Width + 10, this.btnValidate.Location.Y);
+            this.LoadInfo();
 
+            this.frameInstructions.Size     = new Size(this.lblInstructions.Size.Width + this.iconInstructions.Width + 3 * this._frameInstructionsPad.X, this.lblInstructions.Size.Height + 2 * this._frameInstructionsPad.Y);
+            this.frameInstructions.Location = new Point((this.ClientSize.Width - this.frameInstructions.Size.Width) / 2, this.frameInstructions.Location.Y);
+            this.iconInstructions.Location  = new Point(this._frameInstructionsPad.X, this._frameInstructionsPad.Y);
+            this.lblInstructions.Location   = new Point(this.iconInstructions.Width + 2 * this._frameInstructionsPad.X, this._frameInstructionsPad.Y);
 
-            this.CenterToScreen();
+            int spacing = 10;
+            int groupWidth = this.rjUser.Width + spacing + this.rbtnValidate.Width;
+            int startX = (this.ClientSize.Width - groupWidth) / 2;
+            this.rjUser.Location = new Point(startX, this.rjUser.Location.Y);
+            this.rbtnValidate.Location = new Point(this.rjUser.Right + spacing, this.rbtnValidate.Location.Y);
+        }
 
+        private void LoadCalcul()
+        {
+            // Resets
+            this._excelFound = false;
+            this._snippingToolFound = false;
+
+            this.tbCalcul.Text = this._calcul.Generate();
+            this.AutoResizeTextBox(this.tbCalcul);
             Debug.WriteLine(this.tbCalcul.Text);
             Debug.WriteLine(this._calcul.GetResult());
+            this.tbCalcul.Location = new Point((this.ClientSize.Width - this.tbCalcul.Width) / 2, this.tbCalcul.Location.Y);
+            this.frameCalul.Location = new Point(this.tbCalcul.Location.X - this._frameCalculPad.X, this.tbCalcul.Location.Y - this._frameCalculPad.Y);
+            this.frameCalul.Size = new Size(this.tbCalcul.Size.Width + 2 * this._frameCalculPad.X, this.tbCalcul.Height + 2 * this._frameCalculPad.Y);
+
+            foreach (var watcher in this._watchers)
+            {
+                if (watcher.ProcessName.Equals("excel", StringComparison.OrdinalIgnoreCase) ||
+                    watcher.ProcessName.Equals("SnippingTool", StringComparison.OrdinalIgnoreCase) ||
+                    watcher.ProcessName.Equals("ScreenClippingHost", StringComparison.OrdinalIgnoreCase) ||
+                    watcher.ProcessName.Equals("SnipAndSketch", StringComparison.OrdinalIgnoreCase))
+                {
+                    watcher.AcknowledgeCurrentWindows();
+                }
+            }
+        }
+
+        private void LoadInfo()
+        {
+            this.frameInfo.Size = new Size(this.lblInfo.Size.Width + 2 * this._frameInfoPad.X, this.lblInfo.Size.Height + 2 * this._frameInfoPad.Y);
+            this.frameInfo.Location = new Point(this.ClientRectangle.X, this.ClientRectangle.Y);
+            this.lblInfo.Location = new Point(this._frameInfoPad.X, this._frameInfoPad.Y);
+        }
+
+        private void ShowInfo(string message)
+        {
+            this.timerInfo.Stop();
+            this.lblInfo.Visible = false;
+            this.frameInfo.Visible = false;
+
+            this.lblInfo.Text = message;
+            this.lblInfo.AutoSize = true;
+            this.lblInfo.Update();
+
+            this.LoadInfo();
+
+            this.lblInfo.Visible = true;
+            this.frameInfo.Visible = true;
+
+            this.timerInfo.Start();
         }
 
         private bool IsInvalidInput(string input)
@@ -138,49 +239,51 @@ namespace Frank
             return !hasDigit;
         }
 
-        private void btnValidate_Click(object sender, EventArgs e)
+        private void rbtnValidate_Click(object sender, EventArgs e)
         {
+            if (this.IsInvalidInput(this.rjUser.Text))
+            {
+                this.ShowInfo("Caractère invalide.");
+                return;
+            }
+
+            if (this._calcul.CheckEmergency(Decimal.ToInt32(decimal.Parse(this.rjUser.Text))))
+            {
+                MessageBox.Show("Tu triches !!\nMais bon, je l'accepte.", "TRICHEUR !!!");
+                this.CleanClose();
+                return;
+            }
+
             if (this._excelFound)
             {
-                this.lblInfo.Text = "Excel à été ouvert --> nouvelle formule";
-                this.tbCalcul.Text = this._calcul.Generate();
-                Debug.WriteLine(this.tbCalcul.Text);
-                Debug.WriteLine(this._calcul.GetResult());
-
-                // Resets
-                this._excelFound = false;
-                this._snippingToolFound = false;
+                //if (this._excelTries++ == 0) this.ShowInfo("Vous voulez arrêter excel ?");
+                this.ShowInfo("Excel à été ouvert --> nouvelle formule");
+                this.LoadCalcul();
                 return;
             }
 
-            if (this.IsInvalidInput(this.tbUser.Text))
+            if (this._calcul.CheckResult(decimal.Parse(this.rjUser.Text)))
             {
-                this.lblInfo.Text = "Caractère invalide.";
-                return;
-            }
-
-            if (this._calcul.CheckResult(decimal.Parse(this.tbUser.Text)))
-            {
-                MessageBox.Show("C'est le bon résultat, tu es libre.");
-                this._closing = true;
-                this.Close();
+                MessageBox.Show("C'est le bon résultat, tu es libre.", "Bravo");
+                this.CleanClose();
             }
             else
             {
-                this.lblInfo.Text = "Mauvais résultat, recommence.";
+                this.ShowInfo("Mauvais résultat, recommence.");
             }
         }
 
-        private void tbUser_KeyDown(object sender, KeyEventArgs e)
+        private void rjUser_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
             {
-                btnValidate.PerformClick();
+                rbtnValidate.PerformClick();
+                e.SuppressKeyPress = true;
             }
 
             if (e.Control && e.KeyCode == Keys.V)
             {
-                this.tbUser.Text = "Oukilé le texte ?";
+                this.rjUser.Text = "Oukilé le texte ?";
                 e.SuppressKeyPress = true;
             }
         }
@@ -201,37 +304,40 @@ namespace Frank
             this._taskmanager.Monitor();
             if (this._taskmanager.Acknowledge)
             {
-                this.lblInfo.Text = "Un gestionnaire des tâches...\nTu pensais que je le verrais pas ?";
+                this.ShowInfo("Un gestionnaire des tâches...\nTu pensais que je ne le verrais pas ?");
                 this._taskmanager.Acknowledge = false;
             }
 
             // Snipping Tool
-            if (this._snippingToolFound) this.lblInfo.Text = "Et non, pas de Google Lens pour aujourd'hui";
+            if (this._snippingToolFound) this.ShowInfo("Et non, pas de Google Lens pour aujourd'hui");
 
-            // Calculatrice
+            // Autres process
             foreach (var watcher in this._watchers)
             {
                 var windows = ProcessUtils.GetAllWindows(watcher.ProcessName);
 
                 foreach (var hWnd in windows)
                 {
-                    if (!this._processCalc.ContainsKey(hWnd) && !this._pendingWindows.Contains(hWnd))
+                    if (!watcher.KnownWindows.ContainsKey(hWnd) && !watcher.PendingWindows.Contains(hWnd))
                     {
-                        this._pendingWindows.Add(hWnd);
+                        watcher.PendingWindows.Add(hWnd);
+
                         Task.Run(async () =>
                         {
                             Rectangle previous = ProcessUtils.GetBounds(hWnd);
                             Rectangle bounds = previous;
                             int retries = 20;
+
                             while (bounds == previous && retries-- > 0)
                             {
                                 await Task.Delay(500);
                                 bounds = ProcessUtils.GetBounds(hWnd);
                             }
+
                             this.Invoke(() =>
                             {
-                                this._processCalc[hWnd] = bounds;
-                                this._pendingWindows.Remove(hWnd);
+                                watcher.KnownWindows[hWnd] = bounds;
+                                watcher.PendingWindows.Remove(hWnd);
                                 watcher.OnWindowFound(hWnd, bounds);
                             });
                         });
@@ -239,22 +345,21 @@ namespace Frank
                 }
 
                 var alivePids = Process.GetProcessesByName(watcher.ProcessName)
-                                       .Select(p => p.Id).ToHashSet();
+                                       .Select(p => p.Id)
+                                       .ToHashSet();
 
-                var closed = this._processCalc.Keys
+                var closed = watcher.KnownWindows.Keys
                     .Where(h =>
                     {
                         ProcessUtils.GetWindowThreadProcessId(h, out uint pid);
                         return !alivePids.Contains((int)pid);
-                    }).ToList();
+                    })
+                    .ToList();
 
-                if (closed.Any())
+                foreach (var h in closed)
                 {
-                    closed.ForEach(h =>
-                    {
-                        this._processCalc.Remove(h);
-                        watcher.OnWindowLost(h);
-                    });
+                    watcher.KnownWindows.Remove(h);
+                    watcher.OnWindowLost(h);
                 }
             }
         }
@@ -271,6 +376,16 @@ namespace Frank
                 }
             }
         }
+        private void CleanClose()
+        {
+            this.timerSpy.Stop();
+            this.timerMove.Stop();
+            this.timerClipboard.Stop();
+            this.timerInfo.Stop();
+
+            this._closing = true;
+            this.Close();
+        }
 
         private void Lydia_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -278,7 +393,7 @@ namespace Frank
 
             if (!this._closing)
             {
-                this.lblInfo.Text = "Vraiment ?\nTu pensais juste pouvoir quitter comme ça ?";
+                this.ShowInfo("Vraiment ?\nTu pensais juste pouvoir quitter comme ça ?");
                 e.Cancel = true;
             }
         }
@@ -304,7 +419,7 @@ namespace Frank
         protected override void OnShown(EventArgs e)
         {
             base.OnShown(e);
-            SetWindowDisplayAffinity(this.Handle, _WDA_EXCLUDEFROMCAPTURE);
+            //SetWindowDisplayAffinity(this.Handle, _WDA_EXCLUDEFROMCAPTURE);
         }
 
         private void timerClipboard_Tick(object sender, EventArgs e)
@@ -318,6 +433,13 @@ namespace Frank
                 this._lastClipboard = current;
                 Clipboard.SetText("Tu ne pensais pas que ça serait si simple quand même :)");
             }
+        }
+
+        private void timerInfo_Tick(object sender, EventArgs e)
+        {
+            this.lblInfo.Visible = false;
+            this.frameInfo.Visible = false;
+            this.timerInfo.Stop();
         }
     }
 }

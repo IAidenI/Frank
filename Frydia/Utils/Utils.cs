@@ -35,6 +35,7 @@ namespace Frank.Utils
 
             // Ajoute le texte voulu
             using GraphicsPath path = new GraphicsPath();
+            System.Diagnostics.Debug.WriteLine(message.position);
             path.AddString(message.text, message.fontFamily, message.fontStyle, message.fontSize, message.position, message.stringFormat);
 
             // Crée un contour et un remplissage

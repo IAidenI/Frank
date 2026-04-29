@@ -28,7 +28,7 @@ namespace Frank
 
         private void Hide_Load(object sender, EventArgs e)
         {
-            this.label = new TextStyle("Interit !!", new FontFamily("Segoe UI"), (int)FontStyle.Bold, 48, new Point(this.ClientSize.Width / 2, this.ClientSize.Height / 2), Utils.Utils.GetCenterAlignment());
+            this.label = new TextStyle("Interdit !!", new FontFamily("Segoe UI"), (int)FontStyle.Bold, 48, new Point(this.ClientSize.Width / 2, this.ClientSize.Height / 2), Utils.Utils.GetCenterAlignment());
         }
 
         private void pictureBox_Paint(object sender, PaintEventArgs e)

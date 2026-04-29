@@ -26,20 +26,22 @@ namespace Frank.Core
         private Patterns _pattern;
         private decimal _a, _b, _c, _d, _e, _f, _g, _h, _r, _v;
         private string   _calcul;
-        private int _maxValue = 999999;
         
         private UInt32 _runtimeKey;
 
         public Calculation()
         {
-            var values = Enum.GetValues<Patterns>();
-            var random = new Random();
-
-            this._pattern = values[random.Next(values.Length)];
-            this._pattern = Patterns.Pomni;
+            this._pattern = this.GetRandomPattern();
             this._calcul  = "";
 
             this._runtimeKey = this.Hash(typeof(Calculation).FullName!);
+        }
+
+        private Patterns GetRandomPattern()
+        {
+            var values = Enum.GetValues<Patterns>();
+            var random = new Random();
+            return values[random.Next(values.Length)];
         }
 
         private UInt32 Hash(string data)
@@ -59,16 +61,29 @@ namespace Frank.Core
             return x;
         }
 
-        private bool CheckEmergency(decimal input)
+        public bool CheckEmergency(decimal input)
         {
             return this.Cipher(Decimal.ToInt32(input)) == 0x180522fe; // Code secret : -8000 en cas d'urgence
+        }
+
+        private int GetMaxValue()
+        {
+            return this._pattern switch
+            {
+                Patterns.Pomni   => 999999,
+                Patterns.Jax     => 20,
+                Patterns.Ragatha => 5000,
+                Patterns.Gangle  => 1000,
+                Patterns.Kinger  => 10000,
+                _ => 1
+            };
         }
 
         public string Generate()
         {
             var random = new Random();
 
-            int N() => random.Next(1, _maxValue);
+            int N() => random.Next(1, this.GetMaxValue());
 
             switch (this._pattern)
             {
@@ -93,12 +108,18 @@ namespace Frank.Core
                     break;
 
                 case Patterns.Ragatha:
-                    this._a = N();
+                    this._a = 2375;
+                    this._b = 3570;
+                    this._v = 4321;
+                    this._d = 3461;
+                    this._e = 3955;
+                    this._f = 130;
+                    /*this._a = N();
                     this._b = N();
                     this._v = N();
                     this._d = N();
                     this._e = N();
-                    this._f = N();
+                    this._f = N();*/
 
                     this._calcul = $"((42*((({this._a}+{this._b})*{this._v})-(({this._d}/2)+{this._e})))+(({this._f}*3)-9))";
                     break;
@@ -151,7 +172,7 @@ namespace Frank.Core
 
         public bool CheckResult(decimal userValue)
         {
-            return this.GetResult() == userValue || this.CheckEmergency(Decimal.ToInt32(userValue));
+            return this.GetResult() == userValue;
         }
     }
 }

@@ -41,6 +41,7 @@
             pictureBox.TabIndex = 0;
             pictureBox.TabStop = false;
             pictureBox.Paint += pictureBox_Paint;
+            pictureBox.Resize += pictureBox_Resize;
             // 
             // Hide
             // 

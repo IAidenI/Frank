@@ -31,7 +31,7 @@ namespace Frank.Core
 
         public Calculation()
         {
-            this._pattern = this.GetRandomPattern();
+            this._pattern = Patterns.Pomni;
             this._calcul  = "";
 
             this._runtimeKey = this.Hash(typeof(Calculation).FullName!);
@@ -51,9 +51,9 @@ namespace Frank.Core
             return BitConverter.ToUInt32(h, 0);
         }
 
-        private UInt32 Cipher(Int32 input)
+        private uint Cipher(uint input)
         {
-            UInt32 x = unchecked((UInt32)input);
+            uint x = input;
             x ^= this._runtimeKey;
             x = (x << 7) | (x >> 25);
             x += 0X41424344;
@@ -61,9 +61,10 @@ namespace Frank.Core
             return x;
         }
 
-        public bool CheckEmergency(decimal input)
+        public bool CheckEmergency(long input)
         {
-            return this.Cipher(Decimal.ToInt32(input)) == 0x180522fe; // Code secret : -8000 en cas d'urgence
+            if (input < int.MinValue || input > uint.MaxValue) return false;
+            return this.Cipher(unchecked((uint)input)) == 0x180522fe; // Code secret : -8000 en cas d'urgence
         }
 
         private int GetMaxValue()
@@ -81,6 +82,8 @@ namespace Frank.Core
 
         public string Generate()
         {
+            this._pattern = this.GetRandomPattern();
+
             var random = new Random();
 
             int N() => random.Next(1, this.GetMaxValue());
@@ -108,18 +111,12 @@ namespace Frank.Core
                     break;
 
                 case Patterns.Ragatha:
-                    this._a = 2375;
-                    this._b = 3570;
-                    this._v = 4321;
-                    this._d = 3461;
-                    this._e = 3955;
-                    this._f = 130;
-                    /*this._a = N();
+                    this._a = N();
                     this._b = N();
                     this._v = N();
                     this._d = N();
                     this._e = N();
-                    this._f = N();*/
+                    this._f = N();
 
                     this._calcul = $"((42*((({this._a}+{this._b})*{this._v})-(({this._d}/2)+{this._e})))+(({this._f}*3)-9))";
                     break;

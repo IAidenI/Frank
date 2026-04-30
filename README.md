@@ -27,8 +27,6 @@ Ensuite Lydia prend le relai et demande a l'utilisateur de saisir la réponse a 
 
 ## TODO
 
--[ ] Hide : centrer le texte au resize
--[ ] Lydia : bouton kill excel si besoin
--[ ] Frank : refaire le TextStyle en plus propre
--[ ] ProcessWatcher : refacto car pas propre
--[ ] Global : commentaires
+- [ ] Frank : refaire le TextStyle en plus propre
+- [ ] ProcessWatcher : refacto car pas propre
+- [ ] Global : commentaires

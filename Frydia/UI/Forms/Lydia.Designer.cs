@@ -43,6 +43,7 @@
             lblInfo = new Label();
             rjUser = new CustomControls.RJControls.RJTextBox();
             iconInstructions = new Frydia.UI.Controls.CircleIcon();
+            rbtnKillExcel = new Frydia.UI.Controls.RoundedButton.RoundedButton();
             SuspendLayout();
             // 
             // lblTitle
@@ -118,7 +119,7 @@
             frameInfo.Location = new Point(0, 0);
             frameInfo.Name = "frameInfo";
             frameInfo.Radius = 5;
-            frameInfo.Size = new Size(136, 52);
+            frameInfo.Size = new Size(201, 52);
             frameInfo.TabIndex = 9;
             // 
             // timerInfo
@@ -188,12 +189,29 @@
             iconInstructions.TabIndex = 16;
             iconInstructions.Text = "i";
             // 
+            // rbtnKillExcel
+            // 
+            rbtnKillExcel.BorderColor = Color.Transparent;
+            rbtnKillExcel.BorderWidth = 0F;
+            rbtnKillExcel.ButtonColor = Color.FromArgb(30, 111, 255);
+            rbtnKillExcel.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            rbtnKillExcel.ForeColor = Color.White;
+            rbtnKillExcel.Location = new Point(130, 14);
+            rbtnKillExcel.MouseOverBackColor = Color.FromArgb(20, 95, 200);
+            rbtnKillExcel.Name = "rbtnKillExcel";
+            rbtnKillExcel.Radius = 5;
+            rbtnKillExcel.Size = new Size(51, 25);
+            rbtnKillExcel.TabIndex = 17;
+            rbtnKillExcel.Text = "Stop";
+            rbtnKillExcel.Click += rbtnKillExcel_Click;
+            // 
             // Lydia
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.White;
             ClientSize = new Size(800, 450);
+            Controls.Add(rbtnKillExcel);
             Controls.Add(iconInstructions);
             Controls.Add(lblInfo);
             Controls.Add(frameInfo);
@@ -232,5 +250,6 @@
         private Label lblInfo;
         private CustomControls.RJControls.RJTextBox rjUser;
         private Frydia.UI.Controls.CircleIcon iconInstructions;
+        private Frydia.UI.Controls.RoundedButton.RoundedButton rbtnKillExcel;
     }
 }

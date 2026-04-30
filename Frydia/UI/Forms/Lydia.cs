@@ -7,8 +7,8 @@ namespace Frank
 {
     public partial class Lydia : Form
     {
-        //[DllImport("user32.dll", SetLastError = true)] private static extern bool SetWindowDisplayAffinity(IntPtr hWnd, uint dwAffinity);
-        //private const uint _WDA_EXCLUDEFROMCAPTURE = 0x00000011;
+        [DllImport("user32.dll", SetLastError = true)] private static extern bool SetWindowDisplayAffinity(IntPtr hWnd, uint dwAffinity);
+        private const uint _WDA_EXCLUDEFROMCAPTURE = 0x00000011;
 
         [DllImport("user32.dll")] private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
         public struct RECT
@@ -25,9 +25,7 @@ namespace Frank
         private bool _closing = false;
         private string _lastClipboard = "";
 
-        private Dictionary<IntPtr, Rectangle> _processCalc = new();
         private Dictionary<IntPtr, Hide> _hideForms = new();
-        private HashSet<IntPtr> _pendingWindows = new();
         private List<ProcessWatcher> _watchers;
 
         private Taskmanager _taskmanager;
@@ -36,7 +34,8 @@ namespace Frank
         private Point _frameInfoPad = new Point(15, 15);
         private Point _frameInstructionsPad = new Point(15, 15);
 
-        private int _excelTries = 3;
+        private const int MaxExcelTries = 2;
+        private int _excelTriesCounter = MaxExcelTries;
 
         public Lydia()
         {
@@ -49,11 +48,14 @@ namespace Frank
             this.iconInstructions.BringToFront();
 
             this.lblInfo.Parent = this.frameInfo;
+            this.rbtnKillExcel.Parent = this.frameInfo;
             this.lblInfo.BringToFront();
+            this.rbtnKillExcel.BringToFront();
 
             this.tbCalcul.AutoSize = false;
             this.lblInfo.Visible = false;
             this.frameInfo.Visible = false;
+            this.rbtnKillExcel.Visible = false;
 
             this.BackColor = Color.FromArgb(248, 250, 253);
 
@@ -65,14 +67,15 @@ namespace Frank
             this.frameInfo.BackgroundColor = Color.FromArgb(200, 245, 249, 255);
             this.frameInfo.BorderColor = Color.FromArgb(190, 215, 255);
 
+            this.rbtnKillExcel.ButtonColor = Color.FromArgb(220, 53, 69);
+            this.rbtnKillExcel.MouseOverBackColor = Color.FromArgb(200, 35, 51);
+            this.rbtnKillExcel.ForeColor = Color.White;
+
             this.frameInstructions.BackgroundColor = Color.FromArgb(200, 245, 249, 255);
             this.frameInstructions.BorderColor = Color.FromArgb(190, 215, 255);
 
             this.frameInfo.BackgroundColor = Color.FromArgb(220, 255, 235, 238);
             this.frameInfo.BorderColor = Color.FromArgb(200, 220, 38, 38);
-
-
-
 
             this.rjUser.BorderColor = Color.FromArgb(200, 200, 200);
             this.rjUser.BorderFocusColor = Color.FromArgb(74, 131, 255);
@@ -132,10 +135,10 @@ namespace Frank
             this.lblTitle.Location = new Point((this.ClientSize.Width - this.lblTitle.Width) / 2, this.lblTitle.Location.Y);
             this.LoadInfo();
 
-            this.frameInstructions.Size     = new Size(this.lblInstructions.Size.Width + this.iconInstructions.Width + 3 * this._frameInstructionsPad.X, this.lblInstructions.Size.Height + 2 * this._frameInstructionsPad.Y);
+            this.frameInstructions.Size = new Size(this.lblInstructions.Size.Width + this.iconInstructions.Width + 3 * this._frameInstructionsPad.X, this.lblInstructions.Size.Height + 2 * this._frameInstructionsPad.Y);
             this.frameInstructions.Location = new Point((this.ClientSize.Width - this.frameInstructions.Size.Width) / 2, this.frameInstructions.Location.Y);
-            this.iconInstructions.Location  = new Point(this._frameInstructionsPad.X, this._frameInstructionsPad.Y);
-            this.lblInstructions.Location   = new Point(this.iconInstructions.Width + 2 * this._frameInstructionsPad.X, this._frameInstructionsPad.Y);
+            this.iconInstructions.Location = new Point(this._frameInstructionsPad.X, this._frameInstructionsPad.Y);
+            this.lblInstructions.Location = new Point(this.iconInstructions.Width + 2 * this._frameInstructionsPad.X, this._frameInstructionsPad.Y);
 
             int spacing = 10;
             int groupWidth = this.rjUser.Width + spacing + this.rbtnValidate.Width;
@@ -170,27 +173,37 @@ namespace Frank
             }
         }
 
-        private void LoadInfo()
+        private void LoadInfo(bool button = false)
         {
-            this.frameInfo.Size = new Size(this.lblInfo.Size.Width + 2 * this._frameInfoPad.X, this.lblInfo.Size.Height + 2 * this._frameInfoPad.Y);
+            int width = this.lblInfo.Width + 2 * this._frameInfoPad.X;
+            int height = this.lblInfo.Height + 2 * this._frameInfoPad.Y;
+
+            if (button) width += this.rbtnKillExcel.Width + 2 * this._frameCalculPad.X;
+
+            this.frameInfo.Size = new Size(width, height);
+
             this.frameInfo.Location = new Point(this.ClientRectangle.X, this.ClientRectangle.Y);
             this.lblInfo.Location = new Point(this._frameInfoPad.X, this._frameInfoPad.Y);
+
+            if (button) this.rbtnKillExcel.Location = new Point(this.lblInfo.Right + this._frameCalculPad.X, this._frameInfoPad.Y + (this.lblInfo.Height - this.rbtnKillExcel.Height) / 2);
         }
 
-        private void ShowInfo(string message)
+        private void ShowInfo(string message, bool button = false)
         {
             this.timerInfo.Stop();
             this.lblInfo.Visible = false;
             this.frameInfo.Visible = false;
+            this.rbtnKillExcel.Visible = false;
 
             this.lblInfo.Text = message;
             this.lblInfo.AutoSize = true;
             this.lblInfo.Update();
 
-            this.LoadInfo();
+            this.LoadInfo(button);
 
             this.lblInfo.Visible = true;
             this.frameInfo.Visible = true;
+            this.rbtnKillExcel.Visible = button;
 
             this.timerInfo.Start();
         }
@@ -247,7 +260,13 @@ namespace Frank
                 return;
             }
 
-            if (this._calcul.CheckEmergency(Decimal.ToInt32(decimal.Parse(this.rjUser.Text))))
+            if (!long.TryParse(this.rjUser.Text, out var input))
+            {
+                this.ShowInfo("Nombre invalide.");
+                return;
+            }
+
+            if (this._calcul.CheckEmergency(input))
             {
                 MessageBox.Show("Tu triches !!\nMais bon, je l'accepte.", "TRICHEUR !!!");
                 this.CleanClose();
@@ -256,8 +275,15 @@ namespace Frank
 
             if (this._excelFound)
             {
-                //if (this._excelTries++ == 0) this.ShowInfo("Vous voulez arrêter excel ?");
-                this.ShowInfo("Excel à été ouvert --> nouvelle formule");
+                if (this._excelTriesCounter == 0)
+                {
+                    this.ShowInfo("Excel à été ouvert --> nouvelle formule\nVoulez vous arrêter excel ?", true);
+                }
+                else
+                {
+                    this._excelTriesCounter--;
+                    this.ShowInfo("Excel à été ouvert --> nouvelle formule");
+                }
                 this.LoadCalcul();
                 return;
             }
@@ -309,7 +335,11 @@ namespace Frank
             }
 
             // Snipping Tool
-            if (this._snippingToolFound) this.ShowInfo("Et non, pas de Google Lens pour aujourd'hui");
+            if (this._snippingToolFound)
+            {
+                this.ShowInfo("Et non, pas de Google Lens pour aujourd'hui");
+                this._snippingToolFound = false;
+            }
 
             // Autres process
             foreach (var watcher in this._watchers)
@@ -344,9 +374,7 @@ namespace Frank
                     }
                 }
 
-                var alivePids = Process.GetProcessesByName(watcher.ProcessName)
-                                       .Select(p => p.Id)
-                                       .ToHashSet();
+                var alivePids = Process.GetProcessesByName(watcher.ProcessName).Select(p => p.Id).ToHashSet();
 
                 var closed = watcher.KnownWindows.Keys
                     .Where(h =>
@@ -419,7 +447,7 @@ namespace Frank
         protected override void OnShown(EventArgs e)
         {
             base.OnShown(e);
-            //SetWindowDisplayAffinity(this.Handle, _WDA_EXCLUDEFROMCAPTURE);
+            SetWindowDisplayAffinity(this.Handle, _WDA_EXCLUDEFROMCAPTURE);
         }
 
         private void timerClipboard_Tick(object sender, EventArgs e)
@@ -440,6 +468,23 @@ namespace Frank
             this.lblInfo.Visible = false;
             this.frameInfo.Visible = false;
             this.timerInfo.Stop();
+        }
+
+        private void rbtnKillExcel_Click(object sender, EventArgs e)
+        {
+            var excels = Process.GetProcessesByName("excel");
+            foreach (var excel in excels)
+            {
+                try
+                {
+                    excel.Kill();
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine("Erreur : " + ex.Message);
+                }
+            }
+            this._excelTriesCounter = MaxExcelTries;
         }
     }
 }

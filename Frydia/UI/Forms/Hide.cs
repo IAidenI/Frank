@@ -41,6 +41,12 @@ namespace Frank
             this.pictureBox.Invalidate();
         }
 
+        private void pictureBox_Resize(object sender, EventArgs e)
+        {
+            this.label.position = new Point(this.ClientSize.Width /2, this.ClientSize.Height /2);
+            this.pictureBox.Invalidate();
+        }
+
         // Cache du alt + tab
         protected override CreateParams CreateParams
         {

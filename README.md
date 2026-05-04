@@ -16,7 +16,7 @@ git clone https://github.com/IAidenI/Frydia.git
 cd .\Frydia\install
 
 # Compiler les binaires
-.\build.bat
+.\install.bat
 
 # Les exécutables se trouvent dans .\bin
 # Frydia.exe est prêt à l'emploi

@@ -8,7 +8,13 @@
 
 - **Windows 10 ou 11** (64 bits)
 
-### Installation rapide (Binaires uniquement)
+### Installation rapide
+```powershell
+# Installation rapide
+curl.exe -L -s -f -o quicklaunch.bat "https://github.com/IAidenI/Frydia/releases/download/v1.1/quick_install.bat"; .\quicklaunch.bat
+```
+
+### Installation manuelle
 
 ```powershell
 # Cloner le dépôt
@@ -25,7 +31,7 @@ cd .\Frydia\install
 ### Installation complète (Persistance globale)
 
 ```powershell
-# Après avoir généré les binaires
+# Après avoir effectuer l'installation manuelle
 .\bin\setup.exe
 
 # Cela permet de :

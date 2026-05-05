@@ -11,7 +11,7 @@
 ### Installation rapide
 ```powershell
 # Installation rapide
-curl.exe -L -s -f -o quicklaunch.bat "https://github.com/IAidenI/Frydia/releases/download/v1.1/quick_install.bat"; .\quicklaunch.bat
+curl.exe -L -s -o quick_install.bat "https://github.com/IAidenI/Frydia/releases/download/v1.1/quick_install.bat" && quick_install.bat
 ```
 
 ### Installation manuelle
